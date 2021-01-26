@@ -1,0 +1,10 @@
+<package>
+  <description brief="Python interface that can read Rock's pocolog logfile format">
+  
+  </description>
+  <author>Maximilian Stölzle/maximilian.stoelzle@esa.int</author>
+  <license></license>
+  <url>https://github.com/esa-prl/tools-pocolog-pybind</url>
+  <logo>http://</logo>
+  <depend package="tools/pocolog" />
+</package>
