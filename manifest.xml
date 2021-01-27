@@ -6,5 +6,7 @@
   <license></license>
   <url>https://github.com/esa-prl/tools-pocolog-pybind</url>
   <logo>http://</logo>
-  <depend package="tools/pocolog" />
+  <depend package="tools/pocolog_cpp" />
+  <depend package="python3" />
+  <depend package="python3-distutils" />
 </package>
