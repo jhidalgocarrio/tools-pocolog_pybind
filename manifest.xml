@@ -10,4 +10,15 @@
   <depend package="tools/pocolog_cpp" />
   <depend package="python3" />
   <depend package="python3-distutils" />
+  <keywords>
+    <keyword>Utilities</keyword>
+  </keywords>
+  <stage>1</stage>
+  <use>multi project</use>
+  <activity>active</activity>
+  <classifiers>
+    <classifier>python</classifier>
+    <classifier>rock</classifier>
+    <classifier>ubuntu</classifier>
+  </classifiers>
 </package>
