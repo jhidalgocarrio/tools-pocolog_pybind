@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <base/Time.hpp>
 #include <pocolog_cpp/InputDataStream.hpp>
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
@@ -81,6 +82,17 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_index", &pocolog_cpp::Stream::getIndex)
         .def("get_size", &pocolog_cpp::Stream::getSize)
         .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
+    ;
+
+    py::class_<base::Time>(m, "Time")
+        .def("is_null", &base::Time::isNull)
+        .def("to_time_values", &base::Time::toTimeValues)
+        .def("to_string", &base::Time::toString)
+        .def("get_timezone_offset", &base::Time::getTimezoneOffset)
+        .def("tz_info_to_seconds", &base::Time::tzInfoToSeconds)
+        .def("to_seconds", &base::Time::toSeconds)
+        .def("to_milliseconds", &base::Time::toMilliseconds)
+        .def("to_microseconds", &base::Time::toMicroseconds)
     ;
 
     py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m, "InputDataStream")
