@@ -83,7 +83,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
     ;
 
-    py::class_<pocolog_cpp::InputDataStream>(m, "InputDataStream")
+    py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m, "InputDataStream")
         .def("get_cxx_type", &pocolog_cpp::InputDataStream::getCXXType)
         .def("get_type_memory_size", &pocolog_cpp::InputDataStream::getTypeMemorySize)
         .def("get_sample_data", &pocolog_cpp::InputDataStream::getSampleData)
