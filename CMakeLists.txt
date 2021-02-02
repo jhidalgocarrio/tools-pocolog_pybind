@@ -17,11 +17,8 @@ find_package(pybind11 REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${pybind11_INCLUDE_DIR})
 
-# add_library(traversability perception-traversability/src/traversability.cpp)
-# target_link_libraries(traversability PUBLIC ${OpenCV_LIBS})
-
 pybind11_add_module(pocolog_pybind src/pocolog_pybind.cpp)
-# target_link_libraries(traversability_pybind PUBLIC traversability ${OpenCV_LIBS})
+target_link_libraries(pocolog_pybind PUBLIC pocolog_cpp)
 
 # Install
 install(
