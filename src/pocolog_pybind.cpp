@@ -1,6 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-// #include "../pocolog_cpp/Pocolog.hpp"
+#include <pocolog_cpp/MultiFileIndex.hpp>
+#include <pocolog_cpp/Stream.hpp>
+#include <pocolog_cpp/InputDataStream.hpp>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -10,11 +12,19 @@ namespace py = pybind11;
 
 class PocologIterator {
 protected:
-    std::vector<std::string> logfiles;
     int idx = 0;
+
+    std::vector<std::string> logfiles;
+    pocolog_cpp::MultiFileIndex multiIndex;
 public:
     PocologIterator (const std::vector<std::string> logfiles_) {
         logfiles = logfiles_;
+        pocolog_cpp::MultiFileIndex multiIndex = pocolog_cpp::MultiFileIndex();
+        multiIndex.createIndex(logfiles);
+        std::vector<pocolog_cpp::Stream*> streams = multiIndex.getAllStreams();
+        // std::vector<pocolog_cpp::InputDataStream*> dataStreams;
+        // addValidInputDataStreams(streams, dataStreams, only);
+        std::cout << "[pocolog_pybind] " << streams.size() << " streams" << std::endl;
     }
     int getIndex() {
         return idx;
