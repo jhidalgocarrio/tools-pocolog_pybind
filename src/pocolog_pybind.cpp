@@ -9,9 +9,13 @@
 namespace py = pybind11;
 
 class PocologIterator {
-private:
+protected:
+    std::vector<std::string> logfiles;
     int idx = 0;
 public:
+    PocologIterator (const std::vector<std::string> logfiles_) {
+        logfiles = logfiles_;
+    }
     int getIndex() {
         return idx;
     }
@@ -30,14 +34,15 @@ PYBIND11_MODULE(pocolog_pybind, m) {
            __init__
     )pbdoc";
 
-    /*
+    
     py::class_<PocologIterator>(m, "PocologIterator")
-        .def(py::init<>())
-        .def("__len__", [](const std::vector<int> &v) { return v.size(); })
+        .def(py::init<const std::vector<std::string>>())
+        .def("get_index", &PocologIterator::getIndex)
+        /*.def("__len__", [](const std::vector<int> &v) { return v.size(); })
         .def("__iter__", [](std::vector<int> &v) {
            return py::make_iterator(v.begin(), v.end());
-        }, py::keep_alive<0, 1>()) // Keep vector alive while iterator is used
-    ;*/
+        }, py::keep_alive<0, 1>()) // Keep vector alive while iterator is used*/
+    ;
 
     py::class_<std::vector<int>>(m, "IntVector")
         .def(py::init<>())
