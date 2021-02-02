@@ -90,6 +90,8 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     ;
 
     py::class_<pocolog_cpp::MultiFileIndex>(m, "MultiFileIndex")
+        .def(py::init())
+        .def("get_all_streams", &pocolog_cpp::MultiFileIndex::getAllStreams)
         .def("get_size", &pocolog_cpp::MultiFileIndex::getSize)
         // .def("get_global_stream_idx", py::overload_cast<pocolog_cpp::Stream * &>(&pocolog_cpp::MultiFileIndex::getGlobalStreamIdx)); // requires min. C++14
         .def("get_pos_in_stream", &pocolog_cpp::MultiFileIndex::getPosInStream)
