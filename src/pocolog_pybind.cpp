@@ -1,8 +1,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pocolog_cpp/InputDataStream.hpp>
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
-#include <pocolog_cpp/InputDataStream.hpp>
+#include <pocolog_cpp/Format.hpp>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -72,14 +73,14 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     )pbdoc";
 
     py::class_<pocolog_cpp::Stream>(m, "Stream")
-        .def("get_name", &pocolog_cpp::InputDataStream::getName)
-        .def("get_type_name", &pocolog_cpp::InputDataStream::getTypeName)
-        // .def("get_stream_type", &pocolog_cpp::InputDataStream::getStreamType)
-        .def("get_first_sample_time", &pocolog_cpp::InputDataStream::getFistSampleTime)
-        .def("get_last_sample_time", &pocolog_cpp::InputDataStream::getLastSampleTime)
-        .def("get_index", &pocolog_cpp::InputDataStream::getIndex)
-        .def("get_size", &pocolog_cpp::InputDataStream::getSize)
-        .def("get_sample_data", &pocolog_cpp::InputDataStream::getSampleData)
+        .def("get_name", &pocolog_cpp::Stream::getName)
+        .def("get_type_name", &pocolog_cpp::Stream::getTypeName)
+        .def("get_stream_type", &pocolog_cpp::Stream::getStreamType)
+        .def("get_first_sample_time", &pocolog_cpp::Stream::getFistSampleTime)
+        .def("get_last_sample_time", &pocolog_cpp::Stream::getLastSampleTime)
+        .def("get_index", &pocolog_cpp::Stream::getIndex)
+        .def("get_size", &pocolog_cpp::Stream::getSize)
+        .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
     ;
 
     py::class_<pocolog_cpp::InputDataStream>(m, "InputDataStream")
@@ -90,12 +91,10 @@ PYBIND11_MODULE(pocolog_pybind, m) {
 
     py::class_<pocolog_cpp::MultiFileIndex>(m, "MultiFileIndex")
         .def("get_size", &pocolog_cpp::MultiFileIndex::getSize)
-        //.def("get_global_stream_idx", &pocolog_cpp::MultiFileIndex::getGlobalStreamIdx)
+        // .def("get_global_stream_idx", py::overload_cast<pocolog_cpp::Stream * &>(&pocolog_cpp::MultiFileIndex::getGlobalStreamIdx)); // requires min. C++14
         .def("get_pos_in_stream", &pocolog_cpp::MultiFileIndex::getPosInStream)
         .def("get_sample_stream", &pocolog_cpp::MultiFileIndex::getSampleStream)
-        // bool createIndex(const std::vector<std::string> &fileNames);
-        // .def("create_index", static_cast<bool (MultiFileIndex::*)(std::vector< std::string >&)>(&pocolog_cpp::MultiFileIndex::createIndex), "create a pocolog index")
-        // .def("get_global_stream_idx", &pocolog_cpp::MultiFileIndex::getGlobalStreamIdx)
+        .def("create_index", py::overload_cast<const std::vector<std::string> &>(&pocolog_cpp::MultiFileIndex::createIndex)) // requires min. C++14
     ;
 
     
