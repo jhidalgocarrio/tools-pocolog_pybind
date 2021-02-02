@@ -3,7 +3,6 @@ project(pocolog_pybind)
 
 # Find packages **************************************************************************************************
 include(FindPkgConfig)
-find_package(Boost COMPONENTS program_options REQUIRED)
 pkg_check_modules(POCOLOG_CPP "pocolog_cpp" REQUIRED)
 include_directories(
     src ${POCOLOG_CPP_INCLUDE_DIRS}
