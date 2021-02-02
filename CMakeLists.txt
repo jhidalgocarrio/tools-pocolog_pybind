@@ -23,6 +23,13 @@ include_directories(${pybind11_INCLUDE_DIR})
 pybind11_add_module(pocolog_pybind src/pocolog_pybind.cpp)
 # target_link_libraries(traversability_pybind PUBLIC traversability ${OpenCV_LIBS})
 
+# Install
+install(
+    TARGETS pocolog_pybind
+    DESTINATION bin
+)
+
+
 # TRAVERSABILITY_PYBIND_VERSION_INFO is defined by setup.py and passed into the C++ code as a
 # define (VERSION_INFO) here.
 target_compile_definitions(pocolog_pybind PRIVATE VERSION_INFO=${POCOLOG_PYBIND_VERSION_INFO})
