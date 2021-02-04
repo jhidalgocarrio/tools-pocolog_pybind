@@ -59,8 +59,17 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     m_typelib.def("destroy", py::overload_cast<Typelib::Value>(&Typelib::destroy)); // requires min. C++14
     m_typelib.def("destroy", py::overload_cast<Typelib::Value, Typelib::MemoryLayout const&>(&Typelib::destroy)); // requires min. C++14
     m_typelib.def("destroy", py::overload_cast<uint8_t*, Typelib::MemoryLayout const&>(&Typelib::destroy)); // requires min. C++14
+    m_typelib.def("copy", py::overload_cast<Typelib::Value, Typelib::Value>(&Typelib::copy)); // requires min. C++14
+    m_typelib.def("copy", py::overload_cast<void*, void*, Typelib::Type const&>(&Typelib::copy)); // requires min. C++14
+    m_typelib.def("copy", py::overload_cast<void*, void*, Typelib::MemoryLayout const&>(&Typelib::copy)); // requires min. C++14
     m_typelib.def("compare", py::overload_cast<Typelib::Value, Typelib::Value>(&Typelib::compare)); // requires min. C++14
-    // m_typelib.def("compare", py::overload_cast<Typelib::Value, Typelib::Value>(&Typelib::compare)); // requires min. C++14
+    m_typelib.def("compare", py::overload_cast<void*, void*, Typelib::Type const&>(&Typelib::compare)); // requires min. C++14
+    m_typelib.def("load", py::overload_cast<Typelib::Value, std::vector<uint8_t> const&>(&Typelib::load)); // requires min. C++14
+    m_typelib.def("load", py::overload_cast<Typelib::Value, std::vector<uint8_t> const&, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
+    m_typelib.def("load", py::overload_cast<uint8_t*, Typelib::Type const&, std::vector<uint8_t> const&, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
+    m_typelib.def("load", py::overload_cast<Typelib::Value, uint8_t const*, unsigned int>(&Typelib::load)); // requires min. C++14
+    m_typelib.def("load", py::overload_cast<Typelib::Value, uint8_t const*, unsigned int, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
+    m_typelib.def("load", py::overload_cast<uint8_t*, Typelib::Type const&, uint8_t const*, unsigned int, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
 
     py::enum_<Typelib::Type::Category>(m_typelib, "Category", py::arithmetic())
         .value("NULL_TYPE", Typelib::Type::Category::NullType)
