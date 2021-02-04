@@ -1,10 +1,11 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include <base/Time.hpp>
+#include <pocolog_cpp/Format.hpp>
 #include <pocolog_cpp/InputDataStream.hpp>
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
-#include <pocolog_cpp/Format.hpp>
+#include <typelib/value_ops.hh>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -98,6 +99,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m, "InputDataStream")
         .def("get_cxx_type", &pocolog_cpp::InputDataStream::getCXXType)
         .def("get_type_memory_size", &pocolog_cpp::InputDataStream::getTypeMemorySize)
+        // .def("get_sample", &pocolog_cpp::InputDataStream::getSample)
     ;
 
     py::class_<pocolog_cpp::MultiFileIndex>(m, "MultiFileIndex")
