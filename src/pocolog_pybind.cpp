@@ -1,4 +1,5 @@
 #include <base/Time.hpp>
+#include <iostream>
 #include <pocolog_cpp/Format.hpp>
 #include <pocolog_cpp/InputDataStream.hpp>
 #include <pocolog_cpp/MultiFileIndex.hpp>
@@ -6,6 +7,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <typelib/memory_layout.hh>
+#include <typelib/typedisplay.hh>
 #include <typelib/typemodel.hh>
 #include <typelib/value.hh>
 #include <typelib/value_ops.hh>
@@ -19,6 +21,25 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+Typelib::Value get_sample(pocolog_cpp::InputDataStream & stream, size_t sampleNr) {
+    std::vector<uint8_t> data;
+    if(!stream.getSampleData(data, sampleNr))
+        throw std::runtime_error("Error, sample for stream " + stream.getName() + " could not be loaded");
+
+    const Typelib::Type* m_type = stream.getType();
+
+    std::vector<uint8_t> value_buffer;
+    value_buffer.resize(m_type->getSize());
+    auto value = Typelib::Value(value_buffer.data(), *m_type);
+    //init memory area
+    Typelib::init(value);
+    Typelib::load(value, data.data(), data.size());
+
+    // std::cout << Typelib::type_display(*m_type, "  ") << std::endl;
+
+    return value;
+}
+
 
 PYBIND11_MODULE(pocolog_pybind, m) {
     m.doc() = R"pbdoc(
@@ -30,6 +51,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     )pbdoc";
 
     m.def("convert", &convert);
+    m.def("get_sample", &get_sample);
 
     py::module_ m_std = m.def_submodule("std", "Typelib namespace");
     py::class_<std::vector<uint8_t>>(m_std, "VectorUInt8T")
@@ -70,6 +92,8 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     m_typelib.def("load", py::overload_cast<Typelib::Value, uint8_t const*, unsigned int>(&Typelib::load)); // requires min. C++14
     m_typelib.def("load", py::overload_cast<Typelib::Value, uint8_t const*, unsigned int, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
     m_typelib.def("load", py::overload_cast<uint8_t*, Typelib::Type const&, uint8_t const*, unsigned int, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
+    m_typelib.def("value_get_field", py::overload_cast<Typelib::Value, std::string const&>(&Typelib::value_get_field), py::keep_alive<0, 1>()); // requires min. C++14
+    m_typelib.def("value_get_field", py::overload_cast<void*, Typelib::Type const&, std::string const&>(&Typelib::value_get_field)); // requires min. C++14
 
     py::enum_<Typelib::Type::Category>(m_typelib, "Category", py::arithmetic())
         .value("NULL_TYPE", Typelib::Type::Category::NullType)
@@ -112,9 +136,11 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     ;
 
     py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m_pocolog, "InputDataStream")
+        .def("get_type", &pocolog_cpp::InputDataStream::getType)
+        .def("get_typelib_value", &pocolog_cpp::InputDataStream::getTyplibValue)
         .def("get_cxx_type", &pocolog_cpp::InputDataStream::getCXXType)
         .def("get_type_memory_size", &pocolog_cpp::InputDataStream::getTypeMemorySize)
-        // .def("get_sample", &pocolog_cpp::InputDataStream::getSample <std::vector<int>>)
+        // .def("get_sample", &pocolog_cpp::InputDataStream::getSample <Typelib:Value>)
     ;
 
     py::class_<pocolog_cpp::MultiFileIndex>(m_pocolog, "MultiFileIndex")
