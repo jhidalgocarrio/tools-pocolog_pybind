@@ -6,8 +6,10 @@
   <license></license>
   <url>https://github.com/esa-prl/tools-pocolog-pybind</url>
   <logo>http://</logo>
+  <depend package="base/types" />
   <depend package="external/pybind11" />
   <depend package="tools/pocolog_cpp" />
+  <depend package="tools/typelib" />
   <depend package="python3" />
   <depend package="python3-distutils" />
   <keywords>

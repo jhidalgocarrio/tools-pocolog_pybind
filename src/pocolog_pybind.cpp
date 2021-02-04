@@ -7,6 +7,7 @@
 #include <pybind11/stl.h>
 #include <typelib/typemodel.hh>
 #include <typelib/value.hh>
+#include <typelib/value_ops.hh>
 
 #include "Converter.cpp"
 
@@ -15,6 +16,7 @@
 
 
 namespace py = pybind11;
+using namespace pybind11::literals;
 
 
 PYBIND11_MODULE(pocolog_pybind, m) {
@@ -61,6 +63,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     ;
 
     py::class_<Typelib::Value>(m, "TypelibValue")
+        .def(py::init())
+        .def(py::init<void*, Typelib::Type const&>())
+        .def("get_data", &Typelib::Value::getData)
         .def("get_type", &Typelib::Value::getType)
     ;
 
@@ -82,7 +87,8 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     ;
 
     py::class_<pocolog_cpp::MultiFileIndex>(m, "PocologMultiFileIndex")
-        .def(py::init())
+        .def(py::init<const std::vector<std::string>, bool>(), "fileNames"_a, "verbose"_a=true)
+        .def(py::init<bool>(), "verbose"_a=true)
         .def("get_all_streams", &pocolog_cpp::MultiFileIndex::getAllStreams)
         .def("get_size", &pocolog_cpp::MultiFileIndex::getSize)
         // .def("get_global_stream_idx", py::overload_cast<pocolog_cpp::Stream * &>(&pocolog_cpp::MultiFileIndex::getGlobalStreamIdx)); // requires min. C++14
