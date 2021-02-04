@@ -1,4 +1,5 @@
 #include "Converter.hpp"
+
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
 #include <pocolog_cpp/InputDataStream.hpp>
@@ -38,26 +39,22 @@ int convert(const std::vector<std::string>& logfiles, const std::string& output,
     std::vector<pocolog_cpp::InputDataStream*> dataStreams;
     addValidInputDataStreams(streams, dataStreams, only);
     if(verbose >= 1)
-        std::cout << "[pocolog2msgpack] " << dataStreams.size() << " streams"
+        std::cout << "[pocolog_pybind] " << dataStreams.size() << " streams"
                   << std::endl;
 
-    // FILE* fp = fopen(output.c_str(), "w");
+    FILE* fp = fopen(output.c_str(), "w");
 
-    // msgpack_packer packer;
-    // msgpack_packer_init(&packer, fp, msgpack_fbuffer_write);
+    msgpack_packer packer;
+    msgpack_packer_init(&packer, fp, msgpack_fbuffer_write);
 
-    // // We will store both the logdata and its meta data in a map
-    // msgpack_pack_map(&packer, 2 * dataStreams.size());
+    // We will store both the logdata and its meta data in a map
+    msgpack_pack_map(&packer, 2 * dataStreams.size());
 
-    // int exitStatus = convertStreams(
-    //                      packer, dataStreams, start, end, verbose);
-    // exitStatus += convertMetaData(
-    //                   packer, dataStreams, start, end, verbose);
+    int exitStatus = convertStreams(packer, dataStreams, start, end, verbose);
+    exitStatus += convertMetaData(packer, dataStreams, start, end, verbose);
 
-    // fclose(fp);
+    fclose(fp);
     delete multiIndex;
-
-    int exitStatus = 0;
 
     return exitStatus;
 }
@@ -77,14 +74,14 @@ void addValidInputDataStreams(
             dynamic_cast<pocolog_cpp::InputDataStream*>(streams[i]);
         if(!dataStream)
         {
-            std::cerr << "[pocolog2msgpack] Stream #" << i
+            std::cerr << "[pocolog_pybind] Stream #" << i
                       << " is not an InputDataStream, will be ignored!" << std::endl;
             continue;
         }
         dataStreams.push_back(dataStream);
     }
     if(only != "" && dataStreams.size() == 0)
-        std::cerr << "[pocolog2msgpack] Did not find the stream '" << only
+        std::cerr << "[pocolog_pybind] Did not find the stream '" << only
                   << "'." << std::endl;
 }
 
@@ -96,7 +93,7 @@ const int computeRangeEnd(const int userStart, const int userEnd,
     {
         if(printWarning)
         {
-            std::cerr << "[pocolog2msgpack] Requested samples [" << userStart
+            std::cerr << "[pocolog_pybind] Requested samples [" << userStart
                       << ", " << userEnd << "). This stream only has "
                       << streamLength << " samples. Range will be cut to ["
                       << userStart << ", " << streamLength << ")" << std::endl;
@@ -119,7 +116,7 @@ int convertStreams(
         assert(stream);
         const std::string streamName = stream->getName();
         if(verbose >= 1)
-            std::cout << "[pocolog2msgpack] Stream #" << i << " ("
+            std::cout << "[pocolog_pybind] Stream #" << i << " ("
                       << streamName << "): " << stream->getSize()
                       << " samples" << std::endl;
 
@@ -128,7 +125,7 @@ int convertStreams(
 
         if (exportedSize < 0)
         {
-            std::cerr << "[pocolog2msgpack] No samples in requested range for stream \""
+            std::cerr << "[pocolog_pybind] No samples in requested range for stream \""
                       << streamName << "\"." << std::endl;
             exportedSize = 0;
         }
@@ -159,7 +156,7 @@ int convertSamples(Converter& conv, pocolog_cpp::InputDataStream* stream,
 
         if(verbose >= 2)
         {
-            std::cout << "[pocolog2msgpack] Converting sample #" << t
+            std::cout << "[pocolog_pybind] Converting sample #" << t
                       << std::endl;
         }
         std::vector<uint8_t> curSampleData;
@@ -167,14 +164,14 @@ int convertSamples(Converter& conv, pocolog_cpp::InputDataStream* stream,
 
         if(!ok)
         {
-            std::cerr << "[pocolog2msgpack] ERROR: Could not read sample data."
+            std::cerr << "[pocolog_pybind] ERROR: Could not read sample data."
                       << std::endl;
             return EXIT_FAILURE;
         }
 
         if(verbose >= 3)
         {
-            std::cout << "[pocolog2msgpack] Converting sample of size "
+            std::cout << "[pocolog_pybind] Converting sample of size "
                       << curSampleData.size() << std::endl;
         }
 
@@ -206,7 +203,7 @@ int convertSamples(Converter& conv, pocolog_cpp::InputDataStream* stream,
             nextReportProgress += reportProgressDelta;
             if(verbose >= 1)
             {
-                std::cout << "[pocolog2msgpack] " << (int)(progress * 100)
+                std::cout << "[pocolog_pybind] " << (int)(progress * 100)
                           << "% of stream done." << std::endl;
             }
         }
@@ -235,7 +232,7 @@ int convertMetaData(
 
         if(exportedSize < 0)
         {
-            std::cerr << "[pocolog2msgpack] No samples in requested range for meta stream \""
+            std::cerr << "[pocolog_pybind] No samples in requested range for meta stream \""
                       << key << "\"." << std::endl;
             exportedSize = 0;
         }
@@ -288,6 +285,7 @@ void Converter::convertSample(std::vector<uint8_t>& data)
     std::vector<uint8_t> val_buffer;
     val_buffer.resize(type.getSize());
     auto val = Typelib::Value( val_buffer.data(), type );
+    std::cout << typeid(val).name() << '\n';
     Typelib::init( val );
     Typelib::load( val, data.data(), data.size() );
 
@@ -304,7 +302,7 @@ void Converter::reset()
 
 void Converter::printBegin()
 {
-    std::cout << "[pocolog2msgpack]"
+    std::cout << "[pocolog_pybind]"
               << std::setfill(' ') << std::setw(indentation + depth) << " ";
 }
 
@@ -571,7 +569,7 @@ bool Converter::visit_(Typelib::Enum::integral_type& intValue, Typelib::Enum con
     catch(Typelib::Enum::ValueNotFound& e)
     {
         msgpack_pack_int(&pk, intValue);
-        std::cerr << "[pocolog2msgpack] Could not find a string representation "
+        std::cerr << "[pocolog_pybind] Could not find a string representation "
                   << "for enum value " << intValue << "." << std::endl;
     }
 

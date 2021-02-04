@@ -22,9 +22,9 @@ class Converter : public Typelib::ValueVisitor
     /** All data will be put in this packer. */
     msgpack_packer& pk;
     /** Verbosity level. */
-    int verbose;
+    int verbose = 0;
     /** debug output. */
-    bool debug;
+    bool debug = false;
     /** Current depth in the type hierarchy. */
     int depth;
     /** A constant that will be used to format debug output on stdout. */
