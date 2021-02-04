@@ -35,8 +35,6 @@ Typelib::Value get_sample(pocolog_cpp::InputDataStream & stream, size_t sampleNr
     Typelib::init(value);
     Typelib::load(value, data.data(), data.size());
 
-    // std::cout << Typelib::type_display(*m_type, "  ") << std::endl;
-
     return value;
 }
 
@@ -51,7 +49,6 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     )pbdoc";
 
     m.def("convert", &convert);
-    m.def("get_sample", &get_sample);
 
     py::module_ m_std = m.def_submodule("std", "Typelib namespace");
     py::class_<std::vector<uint8_t>>(m_std, "VectorUInt8T")
@@ -94,6 +91,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     m_typelib.def("load", py::overload_cast<uint8_t*, Typelib::Type const&, uint8_t const*, unsigned int, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
     m_typelib.def("value_get_field", py::overload_cast<Typelib::Value, std::string const&>(&Typelib::value_get_field), py::keep_alive<0, 1>()); // requires min. C++14
     m_typelib.def("value_get_field", py::overload_cast<void*, Typelib::Type const&, std::string const&>(&Typelib::value_get_field)); // requires min. C++14
+    m_typelib.def("type_display", [](Typelib::Type const& type, std::string const& indent = "") {
+        std::cout << Typelib::type_display(type, indent);
+    });
 
     py::enum_<Typelib::Type::Category>(m_typelib, "Category", py::arithmetic())
         .value("NULL_TYPE", Typelib::Type::Category::NullType)
@@ -124,6 +124,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     ;
 
     py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
+
+    m_pocolog.def("get_sample", &get_sample);
+
     py::class_<pocolog_cpp::Stream>(m_pocolog, "Stream")
         .def("get_name", &pocolog_cpp::Stream::getName)
         .def("get_type_name", &pocolog_cpp::Stream::getTypeName)
