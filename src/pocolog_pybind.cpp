@@ -3,9 +3,10 @@
 #include <pocolog_cpp/InputDataStream.hpp>
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
-#include <typelib/value.hh>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <typelib/typemodel.hh>
+#include <typelib/value.hh>
 
 #include "Converter.cpp"
 
@@ -36,6 +37,31 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("to_seconds", &base::Time::toSeconds)
         .def("to_milliseconds", &base::Time::toMilliseconds)
         .def("to_microseconds", &base::Time::toMicroseconds)
+    ;
+
+    py::enum_<Typelib::Type::Category>(m, "TypelibCategory", py::arithmetic())
+        .value("NULL_TYPE", Typelib::Type::Category::NullType)
+        .value("ARRAY", Typelib::Type::Category::Array)
+        .value("POINTER", Typelib::Type::Category::Pointer)
+        .value("NUMERIC", Typelib::Type::Category::Numeric)
+        .value("ENUM", Typelib::Type::Category::Enum)
+        .value("COMPOUND", Typelib::Type::Category::Compound)
+        .value("OPAQUE", Typelib::Type::Category::Opaque)
+        .value("CONTAINER", Typelib::Type::Category::Container)
+        .value("NUMBER_OF_VALID_CATEGORIES", Typelib::Type::Category::NumberOfValidCategories)
+    ;
+
+    py::class_<Typelib::Type>(m, "TypelibType")
+        .def("get_name", &Typelib::Type::getName)
+        .def("get_base_ame", &Typelib::Type::getBasename)
+        .def("get_namespace", &Typelib::Type::getNamespace)
+        .def("get_size", &Typelib::Type::getSize)
+        .def("get_category", &Typelib::Type::getCategory)
+        .def("is_null", &Typelib::Type::isNull)
+    ;
+
+    py::class_<Typelib::Value>(m, "TypelibValue")
+        .def("get_type", &Typelib::Value::getType)
     ;
 
     py::class_<pocolog_cpp::Stream>(m, "PocologStream")
