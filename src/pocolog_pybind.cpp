@@ -3,7 +3,7 @@
 #include <pocolog_cpp/InputDataStream.hpp>
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
-#include <typelib/value_ops.hh>
+#include <typelib/value.hh>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -27,18 +27,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
 
     m.def("convert", &convert);
 
-    py::class_<pocolog_cpp::Stream>(m, "Stream")
-        .def("get_name", &pocolog_cpp::Stream::getName)
-        .def("get_type_name", &pocolog_cpp::Stream::getTypeName)
-        .def("get_stream_type", &pocolog_cpp::Stream::getStreamType)
-        .def("get_first_sample_time", &pocolog_cpp::Stream::getFistSampleTime)
-        .def("get_last_sample_time", &pocolog_cpp::Stream::getLastSampleTime)
-        .def("get_index", &pocolog_cpp::Stream::getIndex)
-        .def("get_size", &pocolog_cpp::Stream::getSize)
-        .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
-    ;
-
-    py::class_<base::Time>(m, "Time")
+    py::class_<base::Time>(m, "BaseTime")
         .def("is_null", &base::Time::isNull)
         .def("to_time_values", &base::Time::toTimeValues)
         .def("to_string", &base::Time::toString)
@@ -49,13 +38,24 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("to_microseconds", &base::Time::toMicroseconds)
     ;
 
-    py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m, "InputDataStream")
+    py::class_<pocolog_cpp::Stream>(m, "PocologStream")
+        .def("get_name", &pocolog_cpp::Stream::getName)
+        .def("get_type_name", &pocolog_cpp::Stream::getTypeName)
+        .def("get_stream_type", &pocolog_cpp::Stream::getStreamType)
+        .def("get_first_sample_time", &pocolog_cpp::Stream::getFistSampleTime)
+        .def("get_last_sample_time", &pocolog_cpp::Stream::getLastSampleTime)
+        .def("get_index", &pocolog_cpp::Stream::getIndex)
+        .def("get_size", &pocolog_cpp::Stream::getSize)
+        .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
+    ;
+
+    py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m, "PocologInputDataStream")
         .def("get_cxx_type", &pocolog_cpp::InputDataStream::getCXXType)
         .def("get_type_memory_size", &pocolog_cpp::InputDataStream::getTypeMemorySize)
         // .def("get_sample", &pocolog_cpp::InputDataStream::getSample <std::vector<int>>)
     ;
 
-    py::class_<pocolog_cpp::MultiFileIndex>(m, "MultiFileIndex")
+    py::class_<pocolog_cpp::MultiFileIndex>(m, "PocologMultiFileIndex")
         .def(py::init())
         .def("get_all_streams", &pocolog_cpp::MultiFileIndex::getAllStreams)
         .def("get_size", &pocolog_cpp::MultiFileIndex::getSize)
