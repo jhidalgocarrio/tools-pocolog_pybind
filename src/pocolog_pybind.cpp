@@ -5,6 +5,7 @@
 #include <pocolog_cpp/Stream.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <typelib/memory_layout.hh>
 #include <typelib/typemodel.hh>
 #include <typelib/value.hh>
 #include <typelib/value_ops.hh>
@@ -30,7 +31,13 @@ PYBIND11_MODULE(pocolog_pybind, m) {
 
     m.def("convert", &convert);
 
-    py::class_<base::Time>(m, "BaseTime")
+    py::module_ m_std = m.def_submodule("std", "Typelib namespace");
+    py::class_<std::vector<uint8_t>>(m_std, "VectorUInt8T")
+        .def(py::init())
+    ;
+
+    py::module_ m_base = m.def_submodule("base", "Base types namespace");
+    py::class_<base::Time>(m_base, "BaseTime")
         .def("is_null", &base::Time::isNull)
         .def("to_time_values", &base::Time::toTimeValues)
         .def("to_string", &base::Time::toString)
@@ -41,7 +48,21 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("to_microseconds", &base::Time::toMicroseconds)
     ;
 
-    py::enum_<Typelib::Type::Category>(m, "TypelibCategory", py::arithmetic())
+    py::module_ m_typelib = m.def_submodule("typelib", "Typelib namespace");
+
+    m_typelib.def("init", py::overload_cast<Typelib::Value>(&Typelib::init)); // requires min. C++14
+    m_typelib.def("init", py::overload_cast<Typelib::Value, Typelib::MemoryLayout const&>(&Typelib::init)); // requires min. C++14
+    m_typelib.def("init", py::overload_cast<uint8_t*, Typelib::MemoryLayout const&>(&Typelib::init)); // requires min. C++14
+    m_typelib.def("zero", py::overload_cast<Typelib::Value>(&Typelib::zero)); // requires min. C++14
+    m_typelib.def("zero", py::overload_cast<Typelib::Value, Typelib::MemoryLayout const&>(&Typelib::zero)); // requires min. C++14
+    m_typelib.def("zero", py::overload_cast<uint8_t*, Typelib::MemoryLayout const&>(&Typelib::zero)); // requires min. C++14
+    m_typelib.def("destroy", py::overload_cast<Typelib::Value>(&Typelib::destroy)); // requires min. C++14
+    m_typelib.def("destroy", py::overload_cast<Typelib::Value, Typelib::MemoryLayout const&>(&Typelib::destroy)); // requires min. C++14
+    m_typelib.def("destroy", py::overload_cast<uint8_t*, Typelib::MemoryLayout const&>(&Typelib::destroy)); // requires min. C++14
+    m_typelib.def("compare", py::overload_cast<Typelib::Value, Typelib::Value>(&Typelib::compare)); // requires min. C++14
+    // m_typelib.def("compare", py::overload_cast<Typelib::Value, Typelib::Value>(&Typelib::compare)); // requires min. C++14
+
+    py::enum_<Typelib::Type::Category>(m_typelib, "Category", py::arithmetic())
         .value("NULL_TYPE", Typelib::Type::Category::NullType)
         .value("ARRAY", Typelib::Type::Category::Array)
         .value("POINTER", Typelib::Type::Category::Pointer)
@@ -53,7 +74,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .value("NUMBER_OF_VALID_CATEGORIES", Typelib::Type::Category::NumberOfValidCategories)
     ;
 
-    py::class_<Typelib::Type>(m, "TypelibType")
+    py::class_<Typelib::Type>(m_typelib, "Type")
         .def("get_name", &Typelib::Type::getName)
         .def("get_base_ame", &Typelib::Type::getBasename)
         .def("get_namespace", &Typelib::Type::getNamespace)
@@ -62,14 +83,15 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("is_null", &Typelib::Type::isNull)
     ;
 
-    py::class_<Typelib::Value>(m, "TypelibValue")
+    py::class_<Typelib::Value>(m_typelib, "Value")
         .def(py::init())
         .def(py::init<void*, Typelib::Type const&>())
         .def("get_data", &Typelib::Value::getData)
         .def("get_type", &Typelib::Value::getType)
     ;
 
-    py::class_<pocolog_cpp::Stream>(m, "PocologStream")
+    py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
+    py::class_<pocolog_cpp::Stream>(m_pocolog, "Stream")
         .def("get_name", &pocolog_cpp::Stream::getName)
         .def("get_type_name", &pocolog_cpp::Stream::getTypeName)
         .def("get_stream_type", &pocolog_cpp::Stream::getStreamType)
@@ -80,13 +102,13 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
     ;
 
-    py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m, "PocologInputDataStream")
+    py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m_pocolog, "InputDataStream")
         .def("get_cxx_type", &pocolog_cpp::InputDataStream::getCXXType)
         .def("get_type_memory_size", &pocolog_cpp::InputDataStream::getTypeMemorySize)
         // .def("get_sample", &pocolog_cpp::InputDataStream::getSample <std::vector<int>>)
     ;
 
-    py::class_<pocolog_cpp::MultiFileIndex>(m, "PocologMultiFileIndex")
+    py::class_<pocolog_cpp::MultiFileIndex>(m_pocolog, "MultiFileIndex")
         .def(py::init<const std::vector<std::string>, bool>(), "fileNames"_a, "verbose"_a=true)
         .def(py::init<bool>(), "verbose"_a=true)
         .def("get_all_streams", &pocolog_cpp::MultiFileIndex::getAllStreams)
