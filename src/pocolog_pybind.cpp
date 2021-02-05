@@ -147,7 +147,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def(py::init())
         .def(py::init<void*, Typelib::Type const&>())
         .def("get_data", &Typelib::Value::getData)
-        .def("get_type", &Typelib::Value::getType)
+        .def("get_type", &Typelib::Value::getType, py::return_value_policy::reference_internal)
         .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
             return Typelib::value_get_field(s, name);
         })
