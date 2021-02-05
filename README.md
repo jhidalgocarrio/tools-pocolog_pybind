@@ -8,7 +8,7 @@ python3 -m pip install /home/user/rock/tools/pocolog_pybind
 ```
 
 Below you can find a minimal example to use the Python bindings to read-in a pocolog log:
-```
+```python
 import pocolog_pybind
 
 # create file index. Its possible to specify multiple logfiles
