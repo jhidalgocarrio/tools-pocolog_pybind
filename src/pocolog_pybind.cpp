@@ -18,8 +18,6 @@
 #include <typelib/value.hh>
 #include <typelib/value_ops.hh>
 
-#include "Converter.cpp"
-
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
@@ -53,8 +51,6 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .. autosummary::
            __init__
     )pbdoc";
-
-    m.def("convert", &convert);
 
     py::module_ m_std = m.def_submodule("std", "Typelib namespace");
     py::class_<std::vector<uint8_t>>(m_std, "VectorUInt8T")
