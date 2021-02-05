@@ -5,6 +5,7 @@
 #include <pocolog_cpp/MultiFileIndex.hpp>
 #include <pocolog_cpp/Stream.hpp>
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <typelib/memory_layout.hh>
 #include <typelib/typedisplay.hh>
@@ -121,6 +122,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def(py::init<void*, Typelib::Type const&>())
         .def("get_data", &Typelib::Value::getData)
         .def("get_type", &Typelib::Value::getType)
+        .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
+            return Typelib::value_get_field(s, name);
+        })
     ;
 
     py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
