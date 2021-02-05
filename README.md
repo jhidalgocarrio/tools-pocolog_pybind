@@ -29,4 +29,9 @@ print("first_sample_time", stream.get_first_sample_time())
 print("last_sample_time", stream.get_last_sample_time())
 for t in range(stream.get_size())):
     value = pocolog_pybind.pocolog.get_sample(stream, t)
+
+    # print the structure of the Typelib::Value
+    # the Typelib::Category is most likely a Container at the top-level of the stream
+    # thus we can print the structure of the container
+    self.pocolog_pybind.typelib.type_display(value.get_type(), "")
 ```
