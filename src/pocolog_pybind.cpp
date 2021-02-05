@@ -265,20 +265,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
                 case Typelib::Type::Category::Container: {
                     Typelib::Container const* type_container = dynamic_cast<Typelib::Container const*>(&type);
 
-                    std::cout << "type name " << type_name << std::endl;
-
                     std::string cpp_element = type_name.substr(0, type_name.find("<"));
-                    std::regex r("<\/\w++>");
-                    std::string cpp_template = "";
-                    for(std::sregex_iterator i = std::sregex_iterator(type_name.begin(), type_name.end(), r);
-                        i != std::sregex_iterator(); ++i){
-                        std::smatch match = *i;
-                        cpp_template = match[1].str();
-                    }
-
-                    std::cout << "cpp_element " << cpp_element << " cpp_template " << cpp_template << std::endl; 
-
-                    cpp_template = "</float>";
+                    size_t templ_loc = type_name.find("<");
+                    std::string cpp_template = type_name.substr(templ_loc+2, type_name.length() - 3 - templ_loc);
 
                     if (cpp_element == "/std/string") {
                         std::string* ptr_string = static_cast<std::string*>(ptr_data);
@@ -287,8 +276,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
                         // throw std::runtime_error("The continer /std/string is not currently supported.");
                     } else if (cpp_element == "/std/vector"){
                         size_t array_length = type_container->getElementCount(s.getData());
-                        std::string numeric_type = cpp_template.substr(2, cpp_template.length() - 3);
+                        std::string numeric_type = cpp_template;
 
+                        // TODO: remove
                         std::cout << "array_length " << array_length << std::endl;
 
                         if (numeric_type == "int8_t") {
