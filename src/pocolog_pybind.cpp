@@ -151,9 +151,18 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
             return Typelib::value_get_field(s, name);
         })
-        // .def("__len__", [](const Typelib::Value &s){
-        //     return s.getFields().size();
-        // })
+        .def("__len__", [](const Typelib::Value &s){
+            Typelib::Type const & type = s.getType();
+            if (type.getCategory() == Typelib::Type::Category::Compound){
+                Typelib::Compound const* compound = dynamic_cast<Typelib::Compound const*>(&type);
+                return compound->getFields().size();
+            } else if(type.getCategory() == Typelib::Type::Category::Array) {
+                Typelib::Array const* array = dynamic_cast<Typelib::Array const*>(&type);
+                return array->getDimension();
+            } else {
+                throw std::runtime_error("the __len__ method is only available for Compound and Array categories.");
+            }
+        })
     ;
 
     py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
