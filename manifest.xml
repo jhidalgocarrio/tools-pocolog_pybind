@@ -9,7 +9,7 @@
   <depend package="base/types" />
   <depend package="external/pybind11" />
   <depend package="tools/pocolog_cpp" />
-  <depend package="tools/typelib" />
+  <depend package="typelib" />
   <depend package="python3" />
   <depend package="python3-distutils" />
   <keywords>
