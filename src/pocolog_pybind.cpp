@@ -7,6 +7,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
+#include <sstream>
+#include <string>
 #include <typelib/memory_layout.hh>
 #include <typelib/typedisplay.hh>
 #include <typelib/typemodel.hh>
@@ -108,6 +110,12 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .value("NUMBER_OF_VALID_CATEGORIES", Typelib::Type::Category::NumberOfValidCategories)
     ;
 
+    py::class_<Typelib::MetaData>(m_typelib, "MetaData")
+        // .def("get", py::overload_cast(&Typelib::MetaData::get))
+        // .def("get", py::overload_cast<std::string const&>(&Typelib::MetaData::get))
+        .def("include", &Typelib::MetaData::include, "key"_a)
+    ;
+
     py::class_<Typelib::Type>(m_typelib, "Type")
         .def("get_name", &Typelib::Type::getName)
         .def("get_base_ame", &Typelib::Type::getBasename)
@@ -115,6 +123,24 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_size", &Typelib::Type::getSize)
         .def("get_category", &Typelib::Type::getCategory)
         .def("is_null", &Typelib::Type::isNull)
+    ;
+
+    py::class_<Typelib::Field>(m_typelib, "Field")
+        .def(py::init<const std::string&, Typelib::Type const&>())
+        .def(py::init<Typelib::Field const&>())
+        .def("get_name", &Typelib::Field::getName)
+        .def("get_type", &Typelib::Field::getType)
+        .def("get_offset", &Typelib::Field::getOffset)
+        //.def("get_meta_data", py::overload_cast<>(&Typelib::Field::getMetaData))
+        //.def("get_meta_data", py::overload_cast<std::string const&>(&Typelib::Field::getMetaData))
+    ;
+
+    py::class_<Typelib::Numeric, Typelib::Type>(m_typelib, "Numeric")
+    ;
+
+    py::class_<Typelib::Compound, Typelib::Type>(m_typelib, "Compound")
+        .def(py::init<std::string const&>())
+        .def("get_fields", &Typelib::Compound::getFields)
     ;
 
     py::class_<Typelib::Value>(m_typelib, "Value")
@@ -125,6 +151,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
             return Typelib::value_get_field(s, name);
         })
+        // .def("__len__", [](const Typelib::Value &s){
+        //     return s.getFields().size();
+        // })
     ;
 
     py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
