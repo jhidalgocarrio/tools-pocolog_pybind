@@ -123,6 +123,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_size", &Typelib::Type::getSize)
         .def("get_category", &Typelib::Type::getCategory)
         .def("is_null", &Typelib::Type::isNull)
+        // .def("get_meta_data", py::overload_cast<std::string const&>(&Typelib::Type::getMetaData))
     ;
 
     py::class_<Typelib::Field>(m_typelib, "Field")
@@ -150,6 +151,54 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_type", &Typelib::Value::getType)
         .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
             return Typelib::value_get_field(s, name);
+        })
+        .def("cast", [](const Typelib::Value &s){
+            py::object obj;
+
+            Typelib::Type const & type = s.getType();
+            void* ptr_data = s.getData();
+            switch (type.getCategory()) {
+                case Typelib::Type::Category::Numeric:
+                    std::cout << "basename " << type.getBasename() << std::endl;
+                    if (type.getBasename() == "int8_t") {
+                        obj = py::cast(static_cast<int8_t*>(ptr_data));
+                    } else if (type.getBasename() == "uint8_t") {
+                        obj = py::cast(static_cast<uint8_t*>(ptr_data));
+                    } else if (type.getBasename() == "int16_t") {
+                        obj = py::cast(static_cast<int16_t*>(ptr_data));
+                    } else if (type.getBasename() == "uint16_t") {
+                        obj = py::cast(static_cast<uint16_t*>(ptr_data));
+                    } else if (type.getBasename() == "int32_t") {
+                        obj = py::cast(static_cast<int32_t*>(ptr_data));
+                    } else if (type.getBasename() == "uint32_t") {
+                        obj = py::cast(static_cast<uint32_t*>(ptr_data));
+                    } else if (type.getBasename() == "int64_t") {
+                        obj = py::cast(static_cast<int64_t*>(ptr_data));
+                    } else if (type.getBasename() == "uint64_t") {
+                        obj = py::cast(static_cast<uint64_t*>(ptr_data));
+                    } else if (type.getBasename() == "ssize_t") {
+                        obj = py::cast(static_cast<ssize_t*>(ptr_data));
+                    } else if (type.getBasename() == "float") {
+                        obj = py::cast(static_cast<float*>(ptr_data));
+                    } else if (type.getBasename() == "double") {
+                        obj = py::cast(static_cast<double*>(ptr_data));
+                    } else if (type.getBasename() == "uint8_t") {
+                        obj = py::cast(static_cast<uint8_t*>(ptr_data));
+                    } else if (type.getBasename() == "uint8_t") {
+                        obj = py::cast(static_cast<uint8_t*>(ptr_data));
+                    } else {
+                        std::cout << "Encountered type " << type.getBasename() << std::endl;
+                        throw std::runtime_error("This type is not implemented");
+                    }
+                            
+                    break;
+
+                default:
+                    std::cout << "Encountered type " << type.getCategory() << std::endl;
+                    throw std::runtime_error("This category is not implemented");
+            }
+
+            return obj;
         })
         .def("__len__", [](const Typelib::Value &s){
             Typelib::Type const & type = s.getType();
