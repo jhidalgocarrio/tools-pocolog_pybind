@@ -42,6 +42,226 @@ Typelib::Value get_sample(pocolog_cpp::InputDataStream & stream, size_t sampleNr
     return value;
 }
 
+py::object cast_typelib_value(const Typelib::Value &s, bool recursively = false){
+    py::object obj;
+
+    Typelib::Type const & type = s.getType();
+    std::string type_name = type.getName();
+    std::string basename = type.getBasename();
+    void* ptr_data = s.getData();
+    switch (type.getCategory()) {
+        case Typelib::Type::Category::Numeric: {
+            Typelib::Numeric const* type_numeric = dynamic_cast<Typelib::Numeric const*>(&type);
+
+            if (type.getBasename() == "int8_t") {
+                obj = py::cast(static_cast<int8_t*>(ptr_data));
+            } else if (type.getBasename() == "uint8_t") {
+                obj = py::cast(static_cast<uint8_t*>(ptr_data));
+            } else if (type.getBasename() == "int16_t") {
+                obj = py::cast(static_cast<int16_t*>(ptr_data));
+            } else if (type.getBasename() == "uint16_t") {
+                obj = py::cast(static_cast<uint16_t*>(ptr_data));
+            } else if (type.getBasename() == "int32_t") {
+                obj = py::cast(static_cast<int32_t*>(ptr_data));
+            } else if (type.getBasename() == "uint32_t") {
+                obj = py::cast(static_cast<uint32_t*>(ptr_data));
+            } else if (type.getBasename() == "int64_t") {
+                obj = py::cast(static_cast<int64_t*>(ptr_data));
+            } else if (type.getBasename() == "uint64_t") {
+                obj = py::cast(static_cast<uint64_t*>(ptr_data));
+            } else if (type.getBasename() == "ssize_t") {
+                obj = py::cast(static_cast<ssize_t*>(ptr_data));
+            } else if (type.getBasename() == "size_t") {
+                obj = py::cast(static_cast<size_t*>(ptr_data));
+            } else if (type.getBasename() == "float") {
+                obj = py::cast(static_cast<float*>(ptr_data));
+            } else if (type.getBasename() == "double") {
+                obj = py::cast(static_cast<double*>(ptr_data));
+            } else {
+                std::cout << "Encountered type " << type.getName() << std::endl;
+                throw std::runtime_error("This type is not implemented");
+            }
+        } break;
+
+        case Typelib::Type::Category::Array: {
+            Typelib::Array const* type_array = dynamic_cast<Typelib::Array const*>(&type);
+
+            std::string numeric_type = basename.substr(0, basename.find("["));
+            std::regex r("\\[(\\d+)]");
+            size_t array_length = 0;
+            for(std::sregex_iterator i = std::sregex_iterator(basename.begin(), basename.end(), r);
+                i != std::sregex_iterator(); ++i)
+            {
+                std::smatch match = *i;
+                array_length = std::stoi(match[1].str());
+            }
+            assert((array_length > 0) && "Could not parse length of array");
+
+            if (numeric_type == "int8_t") {
+                int8_t* ptr_array = static_cast<int8_t*>(ptr_data);
+                std::vector<int8_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "uint8_t") {
+                uint8_t* ptr_array = static_cast<uint8_t*>(ptr_data);
+                std::vector<uint8_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "int16_t") {
+                int16_t* ptr_array = static_cast<int16_t*>(ptr_data);
+                std::vector<int16_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "uint16_t") {
+                uint16_t* ptr_array = static_cast<uint16_t*>(ptr_data);
+                std::vector<uint16_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "int32_t") {
+                int32_t* ptr_array = static_cast<int32_t*>(ptr_data);
+                std::vector<int32_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "uint32_t") {
+                uint32_t* ptr_array = static_cast<uint32_t*>(ptr_data);
+                std::vector<uint32_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "int64_t") {
+                int64_t* ptr_array = static_cast<int64_t*>(ptr_data);
+                std::vector<int64_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "uint64_t") {
+                uint64_t* ptr_array = static_cast<uint64_t*>(ptr_data);
+                std::vector<uint64_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "ssize_t") {
+                ssize_t* ptr_array = static_cast<ssize_t*>(ptr_data);
+                std::vector<ssize_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "size_t") {
+                size_t* ptr_array = static_cast<size_t*>(ptr_data);
+                std::vector<size_t> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "float") {
+                float* ptr_array = static_cast<float*>(ptr_data);
+                std::vector<float> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else if (numeric_type == "double") {
+                double* ptr_array = static_cast<double*>(ptr_data);
+                std::vector<double> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
+            } else {
+                std::cout << "Encountered type " << type.getName() << std::endl;
+                throw std::runtime_error("This type is not implemented");
+            }
+
+            break;
+        }
+
+        case Typelib::Type::Category::Container: {
+            Typelib::Container const* type_container = dynamic_cast<Typelib::Container const*>(&type);
+
+            std::string cpp_element = type_name.substr(0, type_name.find("<"));
+            size_t templ_loc = type_name.find("<");
+            std::string cpp_template = type_name.substr(templ_loc+2, type_name.length() - 3 - templ_loc);
+
+            if (cpp_element == "/std/string") {
+                std::string* ptr_string = static_cast<std::string*>(ptr_data);
+                std::string string = *ptr_string;
+                obj = py::cast(string);
+                // throw std::runtime_error("The continer /std/string is not currently supported.");
+            } else if (cpp_element == "/std/vector"){
+                size_t array_length = type_container->getElementCount(s.getData());
+                std::string numeric_type = cpp_template;
+
+                // TODO: remove
+                std::cout << "array_length " << array_length << std::endl;
+
+                if (numeric_type == "int8_t") {
+                    int8_t* ptr_array = static_cast<int8_t*>(ptr_data);
+                    std::vector<int8_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "uint8_t") {
+                    uint8_t* ptr_array = static_cast<uint8_t*>(ptr_data);
+                    std::vector<uint8_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "int16_t") {
+                    int16_t* ptr_array = static_cast<int16_t*>(ptr_data);
+                    std::vector<int16_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "uint16_t") {
+                    uint16_t* ptr_array = static_cast<uint16_t*>(ptr_data);
+                    std::vector<uint16_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "int32_t") {
+                    int32_t* ptr_array = static_cast<int32_t*>(ptr_data);
+                    std::vector<int32_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "uint32_t") {
+                    uint32_t* ptr_array = static_cast<uint32_t*>(ptr_data);
+                    std::vector<uint32_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "int64_t") {
+                    int64_t* ptr_array = static_cast<int64_t*>(ptr_data);
+                    std::vector<int64_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "uint64_t") {
+                    uint64_t* ptr_array = static_cast<uint64_t*>(ptr_data);
+                    std::vector<uint64_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "ssize_t") {
+                    ssize_t* ptr_array = static_cast<ssize_t*>(ptr_data);
+                    std::vector<ssize_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "size_t") {
+                    size_t* ptr_array = static_cast<size_t*>(ptr_data);
+                    std::vector<size_t> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "float") {
+                    float* ptr_array = static_cast<float*>(ptr_data);
+                    std::vector<float> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else if (numeric_type == "double") {
+                    double* ptr_array = static_cast<double*>(ptr_data);
+                    std::vector<double> vect(ptr_array, ptr_array + array_length);
+                    obj = py::cast(vect);
+                } else {
+                    std::cout << "Encountered type " << type.getName() << std::endl;
+                    throw std::runtime_error("This type is not implemented");
+                }
+
+            } else {
+                std::cout << "Encountered type " << type.getName() << std::endl;
+                throw std::runtime_error("This type is not implemented");
+            }
+
+            break;
+        }
+
+        case Typelib::Type::Category::Compound: {
+            py::dict py_dict;
+
+            Typelib::Compound const* type_compound = dynamic_cast<Typelib::Compound const*>(&type);
+
+            typedef Typelib::Compound::FieldList Fields;
+            Fields const& fields(type_compound->getFields());
+            Fields::const_iterator const end = fields.end();
+
+            for (Fields::const_iterator it = fields.begin(); it != end; ++it)
+            {
+                Typelib::Field field = *it;
+
+                py_dict[py::cast(field.getName())] = Typelib::value_get_field(s, field.getName());
+            }
+
+            obj = py_dict;
+
+            break;
+        }
+
+        default:
+            std::cout << "Encountered type " << type.getCategory() << std::endl;
+            throw std::runtime_error("This category is not implemented");
+    }
+
+    return obj;
+}
+
 
 PYBIND11_MODULE(pocolog_pybind, m) {
     m.doc() = R"pbdoc(
@@ -151,225 +371,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
             return Typelib::value_get_field(s, name);
         })
-        .def("cast", [](const Typelib::Value &s){
-            py::object obj;
-
-            Typelib::Type const & type = s.getType();
-            std::string type_name = type.getName();
-            std::string basename = type.getBasename();
-            void* ptr_data = s.getData();
-            switch (type.getCategory()) {
-                case Typelib::Type::Category::Numeric: {
-                    Typelib::Numeric const* type_numeric = dynamic_cast<Typelib::Numeric const*>(&type);
-
-                    if (type.getBasename() == "int8_t") {
-                        obj = py::cast(static_cast<int8_t*>(ptr_data));
-                    } else if (type.getBasename() == "uint8_t") {
-                        obj = py::cast(static_cast<uint8_t*>(ptr_data));
-                    } else if (type.getBasename() == "int16_t") {
-                        obj = py::cast(static_cast<int16_t*>(ptr_data));
-                    } else if (type.getBasename() == "uint16_t") {
-                        obj = py::cast(static_cast<uint16_t*>(ptr_data));
-                    } else if (type.getBasename() == "int32_t") {
-                        obj = py::cast(static_cast<int32_t*>(ptr_data));
-                    } else if (type.getBasename() == "uint32_t") {
-                        obj = py::cast(static_cast<uint32_t*>(ptr_data));
-                    } else if (type.getBasename() == "int64_t") {
-                        obj = py::cast(static_cast<int64_t*>(ptr_data));
-                    } else if (type.getBasename() == "uint64_t") {
-                        obj = py::cast(static_cast<uint64_t*>(ptr_data));
-                    } else if (type.getBasename() == "ssize_t") {
-                        obj = py::cast(static_cast<ssize_t*>(ptr_data));
-                    } else if (type.getBasename() == "size_t") {
-                        obj = py::cast(static_cast<size_t*>(ptr_data));
-                    } else if (type.getBasename() == "float") {
-                        obj = py::cast(static_cast<float*>(ptr_data));
-                    } else if (type.getBasename() == "double") {
-                        obj = py::cast(static_cast<double*>(ptr_data));
-                    } else {
-                        std::cout << "Encountered type " << type.getName() << std::endl;
-                        throw std::runtime_error("This type is not implemented");
-                    }
-                } break;
-
-                case Typelib::Type::Category::Array: {
-                    Typelib::Array const* type_array = dynamic_cast<Typelib::Array const*>(&type);
-
-                    std::string numeric_type = basename.substr(0, basename.find("["));
-                    std::regex r("\\[(\\d+)]");
-                    size_t array_length = 0;
-                    for(std::sregex_iterator i = std::sregex_iterator(basename.begin(), basename.end(), r);
-                        i != std::sregex_iterator(); ++i)
-                    {
-                        std::smatch match = *i;
-                        array_length = std::stoi(match[1].str());
-                    }
-                    assert((array_length > 0) && "Could not parse length of array");
-
-                    if (numeric_type == "int8_t") {
-                        int8_t* ptr_array = static_cast<int8_t*>(ptr_data);
-                        std::vector<int8_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "uint8_t") {
-                        uint8_t* ptr_array = static_cast<uint8_t*>(ptr_data);
-                        std::vector<uint8_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "int16_t") {
-                        int16_t* ptr_array = static_cast<int16_t*>(ptr_data);
-                        std::vector<int16_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "uint16_t") {
-                        uint16_t* ptr_array = static_cast<uint16_t*>(ptr_data);
-                        std::vector<uint16_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "int32_t") {
-                        int32_t* ptr_array = static_cast<int32_t*>(ptr_data);
-                        std::vector<int32_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "uint32_t") {
-                        uint32_t* ptr_array = static_cast<uint32_t*>(ptr_data);
-                        std::vector<uint32_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "int64_t") {
-                        int64_t* ptr_array = static_cast<int64_t*>(ptr_data);
-                        std::vector<int64_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "uint64_t") {
-                        uint64_t* ptr_array = static_cast<uint64_t*>(ptr_data);
-                        std::vector<uint64_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "ssize_t") {
-                        ssize_t* ptr_array = static_cast<ssize_t*>(ptr_data);
-                        std::vector<ssize_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "size_t") {
-                        size_t* ptr_array = static_cast<size_t*>(ptr_data);
-                        std::vector<size_t> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "float") {
-                        float* ptr_array = static_cast<float*>(ptr_data);
-                        std::vector<float> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else if (numeric_type == "double") {
-                        double* ptr_array = static_cast<double*>(ptr_data);
-                        std::vector<double> vect(ptr_array, ptr_array + array_length);
-                        obj = py::cast(vect);
-                    } else {
-                        std::cout << "Encountered type " << type.getName() << std::endl;
-                        throw std::runtime_error("This type is not implemented");
-                    }
-
-                    break;
-                }
-
-                case Typelib::Type::Category::Container: {
-                    Typelib::Container const* type_container = dynamic_cast<Typelib::Container const*>(&type);
-
-                    std::string cpp_element = type_name.substr(0, type_name.find("<"));
-                    size_t templ_loc = type_name.find("<");
-                    std::string cpp_template = type_name.substr(templ_loc+2, type_name.length() - 3 - templ_loc);
-
-                    if (cpp_element == "/std/string") {
-                        std::string* ptr_string = static_cast<std::string*>(ptr_data);
-                        std::string string = *ptr_string;
-                        obj = py::cast(string);
-                        // throw std::runtime_error("The continer /std/string is not currently supported.");
-                    } else if (cpp_element == "/std/vector"){
-                        size_t array_length = type_container->getElementCount(s.getData());
-                        std::string numeric_type = cpp_template;
-
-                        // TODO: remove
-                        std::cout << "array_length " << array_length << std::endl;
-
-                        if (numeric_type == "int8_t") {
-                            int8_t* ptr_array = static_cast<int8_t*>(ptr_data);
-                            std::vector<int8_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "uint8_t") {
-                            uint8_t* ptr_array = static_cast<uint8_t*>(ptr_data);
-                            std::vector<uint8_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "int16_t") {
-                            int16_t* ptr_array = static_cast<int16_t*>(ptr_data);
-                            std::vector<int16_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "uint16_t") {
-                            uint16_t* ptr_array = static_cast<uint16_t*>(ptr_data);
-                            std::vector<uint16_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "int32_t") {
-                            int32_t* ptr_array = static_cast<int32_t*>(ptr_data);
-                            std::vector<int32_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "uint32_t") {
-                            uint32_t* ptr_array = static_cast<uint32_t*>(ptr_data);
-                            std::vector<uint32_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "int64_t") {
-                            int64_t* ptr_array = static_cast<int64_t*>(ptr_data);
-                            std::vector<int64_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "uint64_t") {
-                            uint64_t* ptr_array = static_cast<uint64_t*>(ptr_data);
-                            std::vector<uint64_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "ssize_t") {
-                            ssize_t* ptr_array = static_cast<ssize_t*>(ptr_data);
-                            std::vector<ssize_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "size_t") {
-                            size_t* ptr_array = static_cast<size_t*>(ptr_data);
-                            std::vector<size_t> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "float") {
-                            float* ptr_array = static_cast<float*>(ptr_data);
-                            std::vector<float> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else if (numeric_type == "double") {
-                            double* ptr_array = static_cast<double*>(ptr_data);
-                            std::vector<double> vect(ptr_array, ptr_array + array_length);
-                            obj = py::cast(vect);
-                        } else {
-                            std::cout << "Encountered type " << type.getName() << std::endl;
-                            throw std::runtime_error("This type is not implemented");
-                        }
-
-                    } else {
-                        std::cout << "Encountered type " << type.getName() << std::endl;
-                        throw std::runtime_error("This type is not implemented");
-                    }
-
-                    break;
-                }
-
-                case Typelib::Type::Category::Compound: {
-                    py::dict py_dict;
-
-                    Typelib::Compound const* type_compound = dynamic_cast<Typelib::Compound const*>(&type);
-
-                    typedef Typelib::Compound::FieldList Fields;
-                    Fields const& fields(type_compound->getFields());
-                    Fields::const_iterator const end = fields.end();
-
-                    for (Fields::const_iterator it = fields.begin(); it != end; ++it)
-                    {
-                        Typelib::Field field = *it;
-
-                        py_dict[py::cast(field.getName())] = Typelib::value_get_field(s, field.getName());
-                    }
-
-                    obj = py_dict;
-
-                    break;
-                }
-
-                default:
-                    std::cout << "Encountered type " << type.getCategory() << std::endl;
-                    throw std::runtime_error("This category is not implemented");
-            }
-
-            return obj;
-        })
+        .def("cast", &cast_typelib_value, "recursively"_a=false)
         .def("__len__", [](const Typelib::Value &s){
             Typelib::Type const & type = s.getType();
             if (type.getCategory() == Typelib::Type::Category::Compound){
