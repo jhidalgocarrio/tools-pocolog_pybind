@@ -412,12 +412,24 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     py::class_<pocolog_cpp::MultiFileIndex>(m_pocolog, "MultiFileIndex")
         .def(py::init<const std::vector<std::string>, bool>(), "fileNames"_a, "verbose"_a=true)
         .def(py::init<bool>(), "verbose"_a=true)
-        .def("get_all_streams", &pocolog_cpp::MultiFileIndex::getAllStreams)
+        .def("get_all_streams", [](const pocolog_cpp::MultiFileIndex &s){
+            std::vector<pocolog_cpp::Stream *> streams = s.getAllStreams();
+            py::dict py_dict;
+
+            for(std::vector<pocolog_cpp::Stream *>::iterator it = streams.begin(); it != streams.end(); ++it) {
+                pocolog_cpp::Stream* stream = *it;
+                py_dict[py::cast(stream->getName())] = stream;
+            }
+            return py_dict;
+        })
         .def("get_size", &pocolog_cpp::MultiFileIndex::getSize)
         // .def("get_global_stream_idx", py::overload_cast<pocolog_cpp::Stream * &>(&pocolog_cpp::MultiFileIndex::getGlobalStreamIdx)); // requires min. C++14
         .def("get_pos_in_stream", &pocolog_cpp::MultiFileIndex::getPosInStream)
         .def("get_sample_stream", &pocolog_cpp::MultiFileIndex::getSampleStream)
         .def("create_index", py::overload_cast<const std::vector<std::string> &>(&pocolog_cpp::MultiFileIndex::createIndex)) // requires min. C++14
+        .def("__len__", [](const pocolog_cpp::MultiFileIndex &s){
+            return s.getSize();
+        })
     ;
 
 #ifdef VERSION_INFO

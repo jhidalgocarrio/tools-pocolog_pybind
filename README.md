@@ -17,9 +17,6 @@ multi_file_index.create_index(["/home/user/rock/bundles/hdpr/logs/20210126-0820/
 
 # we gather all available streams and put them into a dictionary using their names as keys
 streams = self.multi_file_index.get_all_streams()
-dict_streams = {}
-for stream in streams:
-    self.streams[stream.get_name()] = stream
 
 # we loop through the /ga_slam.localElevationMapMean stream
 stream = streams["/ga_slam.localElevationMapMean"]
@@ -31,7 +28,8 @@ for t in range(stream.get_size())):
     value = pocolog_pybind.pocolog.get_sample(stream, t)
 
     """
-    print the structure of the Typelib::Value the Typelib::Category is most likely a Container at the top-level of the stream thus we can print the structure of the container
+    print the structure of the Typelib::Value 
+    The Typelib::Category is most likely a Container at the top-level of the stream thus we can print the structure of the container
     """
     self.pocolog_pybind.typelib.type_display(value.get_type(), "")
 
