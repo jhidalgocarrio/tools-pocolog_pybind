@@ -25,7 +25,7 @@ print("size", stream.get_size())
 print("first_sample_time", stream.get_first_sample_time())
 print("last_sample_time", stream.get_last_sample_time())
 for t in range(stream.get_size())):
-    value = pocolog_pybind.pocolog.get_sample(stream, t)
+    value = stream.get_sample(t)
 
     """
     print the structure of the Typelib::Value 

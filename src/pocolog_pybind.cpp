@@ -152,9 +152,6 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                 size_t array_length = type_container->getElementCount(s.getData());
                 std::string numeric_type = cpp_template;
 
-                // TODO: remove
-                std::cout << "array_length " << array_length << std::endl;
-
                 if (numeric_type == "int8_t") {
                     int8_t* ptr_array = static_cast<int8_t*>(ptr_data);
                     std::vector<int8_t> vect(ptr_array, ptr_array + array_length);
