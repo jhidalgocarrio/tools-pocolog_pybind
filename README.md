@@ -13,7 +13,7 @@ import pocolog_pybind
 
 # create file index. Its possible to specify multiple logfiles
 multi_file_index = pocolog_pybind.pocolog.MultiFileIndex()
-multi_file_index.create_index(["/home/user/rock/bundles/hdpr/logs/20210126-0820/ga_slam.0.log])
+multi_file_index.create_index(["/home/user/rock/bundles/hdpr/logs/20210126-0820/ga_slam.0.log"])
 
 # we gather all available streams and put them into a dictionary using their names as keys
 streams = self.multi_file_index.get_all_streams()
@@ -30,8 +30,27 @@ print("last_sample_time", stream.get_last_sample_time())
 for t in range(stream.get_size())):
     value = pocolog_pybind.pocolog.get_sample(stream, t)
 
-    # print the structure of the Typelib::Value
-    # the Typelib::Category is most likely a Container at the top-level of the stream
-    # thus we can print the structure of the container
+    """
+    print the structure of the Typelib::Value the Typelib::Category is most likely a Container at the top-level of the stream thus we can print the structure of the container
+    """
     self.pocolog_pybind.typelib.type_display(value.get_type(), "")
+
+    """
+    We cast the Typelib::Value object recursively into python types
+        Typelib::Compound --> Python dict
+        Typelib::Array --> Python list
+        Typelib::Container --> Python string or array
+        Typelib::Numeric --> corresponding numeric type in Python
+    If we set recursively=False, only the first level is casted
+    """
+
+    py_value = value.cast(recursively=True)
+
+    # now we can print the keys of the Python dictionary
+    print(py_value.keys())
+
+    # and access our local DEM
+    local_dem = np.array(py_value["data"])
+    local_dem = occ_dem.reshape((py_value["height"], py_value["width"]), order="F")
+
 ```
