@@ -25,23 +25,6 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-Typelib::Value get_sample(pocolog_cpp::InputDataStream & stream, size_t sampleNr) {
-    std::vector<uint8_t> data;
-    if(!stream.getSampleData(data, sampleNr))
-        throw std::runtime_error("Error, sample for stream " + stream.getName() + " could not be loaded");
-
-    const Typelib::Type* m_type = stream.getType();
-
-    std::vector<uint8_t> value_buffer;
-    value_buffer.resize(m_type->getSize());
-    auto value = Typelib::Value(value_buffer.data(), *m_type);
-    //init memory area
-    Typelib::init(value);
-    Typelib::load(value, data.data(), data.size());
-
-    return value;
-}
-
 py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
     py::object obj;
 
@@ -394,8 +377,6 @@ PYBIND11_MODULE(pocolog_pybind, m) {
 
     py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
 
-    m_pocolog.def("get_sample", &get_sample);
-
     py::class_<pocolog_cpp::Stream>(m_pocolog, "Stream")
         .def("get_name", &pocolog_cpp::Stream::getName)
         .def("get_type_name", &pocolog_cpp::Stream::getTypeName)
@@ -405,6 +386,22 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_index", &pocolog_cpp::Stream::getIndex)
         .def("get_size", &pocolog_cpp::Stream::getSize)
         .def("get_sample_data", &pocolog_cpp::Stream::getSampleData)
+        .def("get_sample", [](pocolog_cpp::InputDataStream &stream, size_t sampleNr) {
+            std::vector<uint8_t> data;
+            if(!stream.getSampleData(data, sampleNr))
+                throw std::runtime_error("Error, sample for stream " + stream.getName() + " could not be loaded");
+
+            const Typelib::Type* m_type = stream.getType();
+
+            std::vector<uint8_t> value_buffer;
+            value_buffer.resize(m_type->getSize());
+            auto value = Typelib::Value(value_buffer.data(), *m_type);
+            //init memory area
+            Typelib::init(value);
+            Typelib::load(value, data.data(), data.size());
+
+            return value;
+        })
     ;
 
     py::class_<pocolog_cpp::InputDataStream, pocolog_cpp::Stream>(m_pocolog, "InputDataStream")
