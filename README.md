@@ -42,7 +42,7 @@ for t in range(stream.get_size())):
     If we set recursively=False, only the first level is casted
     """
 
-    py_value = value.cast(recursively=True)
+    py_value = value.cast(recursive=True)
 
     # now we can print the keys of the Python dictionary
     print(py_value.keys())

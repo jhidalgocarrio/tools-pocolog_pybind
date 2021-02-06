@@ -42,7 +42,7 @@ Typelib::Value get_sample(pocolog_cpp::InputDataStream & stream, size_t sampleNr
     return value;
 }
 
-py::object cast_typelib_value(const Typelib::Value &s, bool recursively = false){
+py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
     py::object obj;
 
     Typelib::Type const & type = s.getType();
@@ -246,7 +246,13 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursively = false)
             {
                 Typelib::Field field = *it;
 
-                py_dict[py::cast(field.getName())] = Typelib::value_get_field(s, field.getName());
+                Typelib::Value field_value = Typelib::value_get_field(s, field.getName());
+
+                if (recursive) {
+                    py_dict[py::cast(field.getName())] = cast_typelib_value(field_value, recursive);
+                } else {
+                    py_dict[py::cast(field.getName())] = field_value;
+                }
             }
 
             obj = py_dict;
@@ -371,7 +377,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("__getitem__", [](const Typelib::Value &s, std::string const& name){
             return Typelib::value_get_field(s, name);
         })
-        .def("cast", &cast_typelib_value, "recursively"_a=false)
+        .def("cast", &cast_typelib_value, "recursive"_a=false)
         .def("__len__", [](const Typelib::Value &s){
             Typelib::Type const & type = s.getType();
             if (type.getCategory() == Typelib::Type::Category::Compound){
