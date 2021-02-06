@@ -342,6 +342,27 @@ PYBIND11_MODULE(pocolog_pybind, m) {
                     break;
                 }
 
+                case Typelib::Type::Category::Compound: {
+                    py::dict py_dict;
+
+                    Typelib::Compound const* type_compound = dynamic_cast<Typelib::Compound const*>(&type);
+
+                    typedef Typelib::Compound::FieldList Fields;
+                    Fields const& fields(type_compound->getFields());
+                    Fields::const_iterator const end = fields.end();
+
+                    for (Fields::const_iterator it = fields.begin(); it != end; ++it)
+                    {
+                        Typelib::Field field = *it;
+
+                        py_dict[py::cast(field.getName())] = Typelib::value_get_field(s, field.getName());
+                    }
+
+                    obj = py_dict;
+
+                    break;
+                }
+
                 default:
                     std::cout << "Encountered type " << type.getCategory() << std::endl;
                     throw std::runtime_error("This category is not implemented");
