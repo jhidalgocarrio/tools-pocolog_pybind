@@ -31,7 +31,7 @@ for t in range(stream.get_size())):
     print the structure of the Typelib::Value 
     The Typelib::Category is most likely a Container at the top-level of the stream thus we can print the structure of the container
     """
-    self.pocolog_pybind.typelib.type_display(value.get_type(), "")
+    value.get_type().display(indent="")
 
     """
     We cast the Typelib::Value object recursively into python types
@@ -45,7 +45,7 @@ for t in range(stream.get_size())):
     py_value = value.cast(recursive=True)
 
     # we need to free the memory in the heap of the Typelib::Value object:
-    py_value.destroy()
+    value.destroy()
 
     # now we can print the keys of the Python dictionary
     print(py_value.keys())

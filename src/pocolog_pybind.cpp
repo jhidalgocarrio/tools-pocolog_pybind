@@ -299,9 +299,6 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     m_typelib.def("load", py::overload_cast<uint8_t*, Typelib::Type const&, uint8_t const*, unsigned int, Typelib::MemoryLayout const&>(&Typelib::load)); // requires min. C++14
     m_typelib.def("value_get_field", py::overload_cast<Typelib::Value, std::string const&>(&Typelib::value_get_field), py::keep_alive<0, 1>()); // requires min. C++14
     m_typelib.def("value_get_field", py::overload_cast<void*, Typelib::Type const&, std::string const&>(&Typelib::value_get_field)); // requires min. C++14
-    m_typelib.def("type_display", [](Typelib::Type const& type, std::string const& indent = "") {
-        std::cout << Typelib::type_display(type, indent);
-    });
 
     py::enum_<Typelib::Type::Category>(m_typelib, "Category", py::arithmetic())
         .value("NULL_TYPE", Typelib::Type::Category::NullType)
@@ -329,6 +326,9 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("get_category", &Typelib::Type::getCategory)
         .def("is_null", &Typelib::Type::isNull)
         // .def("get_meta_data", py::overload_cast<std::string const&>(&Typelib::Type::getMetaData))
+        .def("display", [](const Typelib::Type &s, std::string const& indent = ""){
+            std::cout << Typelib::type_display(s, indent);
+        }, "indent"_a = "")
     ;
 
     py::class_<Typelib::Field>(m_typelib, "Field")
