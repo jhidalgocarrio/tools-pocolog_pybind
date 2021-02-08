@@ -44,6 +44,9 @@ for t in range(stream.get_size())):
 
     py_value = value.cast(recursive=True)
 
+    # we need to free the memory in the heap of the Typelib::Value object:
+    py_value.destroy()
+
     # now we can print the keys of the Python dictionary
     print(py_value.keys())
 
