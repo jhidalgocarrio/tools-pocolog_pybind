@@ -390,9 +390,10 @@ PYBIND11_MODULE(pocolog_pybind, m) {
 
             const Typelib::Type* m_type = stream.getType();
 
-            std::vector<uint8_t> value_buffer;
-            value_buffer.resize(m_type->getSize());
-            auto value = Typelib::Value(value_buffer.data(), *m_type);
+            std::vector<uint8_t>* value_buffer = new std::vector<uint8_t>();
+            value_buffer->resize(m_type->getSize());
+            auto value = Typelib::Value(value_buffer->data(), *m_type);
+
             //init memory area
             Typelib::init(value);
             Typelib::load(value, data.data(), data.size());
