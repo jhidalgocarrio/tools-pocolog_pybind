@@ -345,10 +345,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
             }
         })
         .def("destroy", [](const Typelib::Value &s){
-            void* ptr_data_void = s.getData();
-            std::vector<uint8_t>* ptr_data = static_cast<std::vector<uint8_t>*>(ptr_data_void);
             Typelib::destroy(s);
-            delete ptr_data;
         })
     ;
 
