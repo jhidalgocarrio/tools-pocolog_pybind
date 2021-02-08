@@ -370,6 +370,12 @@ PYBIND11_MODULE(pocolog_pybind, m) {
                 throw std::runtime_error("the __len__ method is only available for Compound and Array categories.");
             }
         })
+        .def("destroy", [](const Typelib::Value &s){
+            void* ptr_data_void = s.getData();
+            std::vector<uint8_t>* ptr_data = static_cast<std::vector<uint8_t>*>(ptr_data_void);
+            Typelib::destroy(s);
+            delete ptr_data;
+        })
     ;
 
     py::module_ m_pocolog = m.def_submodule("pocolog", "Pocolog namespace");
