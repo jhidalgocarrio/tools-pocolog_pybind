@@ -144,62 +144,36 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
             std::string cpp_template = type_name.substr(templ_loc+2, type_name.length() - 3 - templ_loc);
 
             if (cpp_element == "/std/string") {
-                std::string* ptr_string = static_cast<std::string*>(ptr_data);
-                std::string string = *ptr_string;
-                obj = py::cast(string);
+                obj = py::cast(*(static_cast<std::string*>(ptr_data)));
                 // throw std::runtime_error("The continer /std/string is not currently supported.");
             } else if (cpp_element == "/std/vector"){
                 size_t array_length = type_container->getElementCount(s.getData());
                 std::string numeric_type = cpp_template;
 
                 if (numeric_type == "int8_t") {
-                    int8_t* ptr_array = static_cast<int8_t*>(ptr_data);
-                    std::vector<int8_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<int8_t>*>(ptr_data)));
                 } else if (numeric_type == "uint8_t") {
-                    uint8_t* ptr_array = static_cast<uint8_t*>(ptr_data);
-                    std::vector<uint8_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<uint8_t>*>(ptr_data)));
                 } else if (numeric_type == "int16_t") {
-                    int16_t* ptr_array = static_cast<int16_t*>(ptr_data);
-                    std::vector<int16_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<int16_t>*>(ptr_data)));
                 } else if (numeric_type == "uint16_t") {
-                    uint16_t* ptr_array = static_cast<uint16_t*>(ptr_data);
-                    std::vector<uint16_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<uint16_t>*>(ptr_data)));
                 } else if (numeric_type == "int32_t") {
-                    int32_t* ptr_array = static_cast<int32_t*>(ptr_data);
-                    std::vector<int32_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<int32_t>*>(ptr_data)));
                 } else if (numeric_type == "uint32_t") {
-                    uint32_t* ptr_array = static_cast<uint32_t*>(ptr_data);
-                    std::vector<uint32_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<uint32_t>*>(ptr_data)));
                 } else if (numeric_type == "int64_t") {
-                    int64_t* ptr_array = static_cast<int64_t*>(ptr_data);
-                    std::vector<int64_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<int64_t>*>(ptr_data)));
                 } else if (numeric_type == "uint64_t") {
-                    uint64_t* ptr_array = static_cast<uint64_t*>(ptr_data);
-                    std::vector<uint64_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<uint64_t>*>(ptr_data)));
                 } else if (numeric_type == "ssize_t") {
-                    ssize_t* ptr_array = static_cast<ssize_t*>(ptr_data);
-                    std::vector<ssize_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<ssize_t>*>(ptr_data)));
                 } else if (numeric_type == "size_t") {
-                    size_t* ptr_array = static_cast<size_t*>(ptr_data);
-                    std::vector<size_t> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<size_t>*>(ptr_data)));
                 } else if (numeric_type == "float") {
-                    float* ptr_array = static_cast<float*>(ptr_data);
-                    std::vector<float> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<float>*>(ptr_data)));
                 } else if (numeric_type == "double") {
-                    double* ptr_array = static_cast<double*>(ptr_data);
-                    std::vector<double> vect(ptr_array, ptr_array + array_length);
-                    obj = py::cast(vect);
+                    obj = py::cast(*(static_cast<std::vector<double>*>(ptr_data)));
                 } else {
                     std::cout << "Encountered type " << type.getName() << std::endl;
                     throw std::runtime_error("This type is not implemented");
