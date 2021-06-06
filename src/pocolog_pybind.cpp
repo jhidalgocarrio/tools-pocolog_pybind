@@ -1,4 +1,5 @@
 #include <base/Time.hpp>
+#include <base/samples/Event.hpp>
 #include <cassert>
 #include <iostream>
 #include <iterator>
@@ -60,6 +61,8 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                 obj = py::cast(static_cast<float*>(ptr_data));
             } else if (type.getBasename() == "double") {
                 obj = py::cast(static_cast<double*>(ptr_data));
+            } else if (type.getBasename() == "bool") {
+                obj = py::cast(static_cast<bool*>(ptr_data));
             } else {
                 std::cout << "Encountered type " << type.getName() << std::endl;
                 throw std::runtime_error("This type is not implemented");
@@ -128,6 +131,10 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                 double* ptr_array = static_cast<double*>(ptr_data);
                 std::vector<double> vect(ptr_array, ptr_array + array_length);
                 obj = py::cast(vect);
+            } else if (numeric_type == "bool") {
+                bool* ptr_array = static_cast<bool*>(ptr_data);
+                std::vector<bool> vect(ptr_array, ptr_array + array_length);
+                obj = py::cast(vect);
             } else {
                 std::cout << "Encountered type " << type.getName() << std::endl;
                 throw std::runtime_error("This type is not implemented");
@@ -174,6 +181,8 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                     obj = py::cast(*(static_cast<std::vector<float>*>(ptr_data)));
                 } else if (numeric_type == "double") {
                     obj = py::cast(*(static_cast<std::vector<double>*>(ptr_data)));
+                } else if (numeric_type == "base/samples/Event") {
+                    obj = py::cast(*(static_cast<std::vector<::base::samples::Event>*>(ptr_data)));
                 } else {
                     std::cout << "Encountered type " << type.getName() << std::endl;
                     throw std::runtime_error("This type is not implemented");
@@ -238,6 +247,13 @@ PYBIND11_MODULE(pocolog_pybind, m) {
     ;
 
     py::module_ m_base = m.def_submodule("base", "Base types namespace");
+    py::class_<base::samples::Event>(m_base, "Event")
+        .def(py::init<>())
+        .def_readwrite("x", &base::samples::Event::x)
+        .def_readwrite("y", &base::samples::Event::y)
+        .def_readwrite("ts", &base::samples::Event::ts)
+        .def_readwrite("p", &base::samples::Event::polarity)
+    ;
     py::class_<base::Time>(m_base, "BaseTime")
         .def("is_null", &base::Time::isNull)
         .def("to_time_values", &base::Time::toTimeValues)
