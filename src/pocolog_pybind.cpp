@@ -1,5 +1,8 @@
 #include <base/Time.hpp>
+#include <base/Eigen.hpp>
 #include <base/samples/Event.hpp>
+#include <base/samples/RigidBodyState.hpp>
+#include <orocos/eds/edsTypes.hpp>
 #include <cassert>
 #include <iostream>
 #include <iterator>
@@ -11,6 +14,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 #include <sstream>
 #include <string>
 #include <typelib/memory_layout.hh>
@@ -183,6 +187,8 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                     obj = py::cast(*(static_cast<std::vector<double>*>(ptr_data)));
                 } else if (numeric_type == "base/samples/Event") {
                     obj = py::cast(*(static_cast<std::vector<::base::samples::Event>*>(ptr_data)));
+                } else if (numeric_type == "base/samples/RigidBodyState_m") {
+                    obj = py::cast(*(static_cast<std::vector<::base::samples::RigidBodyState>*>(ptr_data)));
                 } else {
                     std::cout << "Encountered type " << type.getName() << std::endl;
                     throw std::runtime_error("This type is not implemented");
@@ -270,6 +276,37 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("to_seconds", &base::Time::toSeconds)
         .def("to_milliseconds", &base::Time::toMilliseconds)
         .def("to_microseconds", &base::Time::toMicroseconds)
+    ;
+    py::class_<base::samples::RigidBodyState>(m_base, "RigidBodyState")
+        .def(py::init<>())
+        .def_readwrite("time", &base::samples::RigidBodyState::time)
+        .def_readwrite("source_frame", &base::samples::RigidBodyState::sourceFrame)
+        .def_readwrite("target_frame", &base::samples::RigidBodyState::targetFrame)
+        .def_readwrite("position", &base::samples::RigidBodyState::position)
+        .def_readwrite("cov_position", &base::samples::RigidBodyState::cov_position)
+        .def_readwrite("orientation", &base::samples::RigidBodyState::orientation)
+        .def_readwrite("cov_orientation", &base::samples::RigidBodyState::cov_orientation)
+        .def_readwrite("velocity", &base::samples::RigidBodyState::velocity)
+        .def_readwrite("cov_velocity", &base::samples::RigidBodyState::cov_velocity)
+        .def_readwrite("angular_velocity", &base::samples::RigidBodyState::angular_velocity)
+        .def_readwrite("cov_angular_velocity", &base::samples::RigidBodyState::cov_angular_velocity)
+    ;
+    py::class_<base::Quaterniond>(m_base, "Quaterniond")
+        .def(py::init<>())
+        .def("x", (double &(Eigen::Quaternion<double,  Eigen::DontAlign>::*)()) (&Eigen::Quaternion<double,  Eigen::DontAlign>::x))
+        .def("y", (double &(Eigen::Quaternion<double,  Eigen::DontAlign>::*)()) (&Eigen::Quaternion<double,  Eigen::DontAlign>::y))
+        .def("z", (double &(Eigen::Quaternion<double,  Eigen::DontAlign>::*)()) (&Eigen::Quaternion<double,  Eigen::DontAlign>::z))
+        .def("w", (double &(Eigen::Quaternion<double,  Eigen::DontAlign>::*)()) (&Eigen::Quaternion<double,  Eigen::DontAlign>::w))
+        .def("__repr__",[](const base::Quaterniond &q) {
+            return "["+std::to_string(q.x())+" "+ std::to_string(q.y())+" "+ std::to_string(q.z())+" "+ std::to_string(q.w())+"]";
+        })
+    ;
+
+    py::module_ m_eds = m.def_submodule("eds", "EDS types namespace");
+    py::class_<eds::VectorKFs>(m_eds, "VectorKFs")
+        .def(py::init<>())
+        .def_readwrite("time", &eds::VectorKFs::time)
+        .def_readwrite("kfs", &eds::VectorKFs::kfs)
     ;
 
     py::module_ m_typelib = m.def_submodule("typelib", "Typelib namespace");
