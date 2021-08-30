@@ -1,6 +1,7 @@
 #include <base/Time.hpp>
 #include <base/Eigen.hpp>
 #include <base/samples/Event.hpp>
+#include <base/samples/Frame.hpp>
 #include <base/samples/RigidBodyState.hpp>
 #include <orocos/eds/edsTypes.hpp>
 #include <cassert>
@@ -140,7 +141,7 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                 std::vector<bool> vect(ptr_array, ptr_array + array_length);
                 obj = py::cast(vect);
             } else {
-                std::cout << "Encountered type " << type.getName() << std::endl;
+                std::cout << "Encountered type " << type.getName() <<" has numeric type "<<numeric_type<< std::endl;
                 throw std::runtime_error("This type is not implemented");
             }
 
@@ -193,9 +194,11 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                     obj = py::cast(*(static_cast<std::vector<::base::Vector3d>*>(ptr_data)));
                 } else if (numeric_type == "wrappers/Matrix</double,4,1>") {
                     obj = py::cast(*(static_cast<std::vector<::base::Vector4d>*>(ptr_data)));
+                } else if (numeric_type == "base/samples/frame/frame_attrib_t") {
+                    obj = py::cast(*(static_cast<std::vector<::base::samples::frame::frame_attrib_t>*>(ptr_data)));
                 } else {
                     std::cout << "Encountered type " << type.getName()<<" has numeric type "<<numeric_type<< std::endl;
-                    throw std::runtime_error("This type here is not implemented");
+                    throw std::runtime_error("This type is not implemented");
                 }
 
             } else {
@@ -232,9 +235,21 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
 
             break;
         }
+        case Typelib::Type::Category::Enum: {
+            Typelib::Enum const* type_enum = dynamic_cast<Typelib::Enum const*>(&type);
+
+            if (type.getBasename() == "frame_mode_t") {
+                obj = py::cast(static_cast<base::samples::frame::frame_mode_t*>(ptr_data));
+            } else if (type.getBasename() == "frame_status_t") {
+                obj = py::cast(static_cast<base::samples::frame::frame_status_t*>(ptr_data));
+             } else {
+                std::cout << "Encountered type " << type.getName() << std::endl;
+                throw std::runtime_error("This type is not implemented");
+            }
+        } break;
 
         default:
-            std::cout << "Encountered type " << type.getCategory() << std::endl;
+            std::cout << "Encountered type " << type.getCategory()<<" type "<< type << std::endl;
             throw std::runtime_error("This category is not implemented");
     }
 
@@ -294,6 +309,12 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def_readwrite("cov_velocity", &base::samples::RigidBodyState::cov_velocity)
         .def_readwrite("angular_velocity", &base::samples::RigidBodyState::angular_velocity)
         .def_readwrite("cov_angular_velocity", &base::samples::RigidBodyState::cov_angular_velocity)
+    ;
+    py::class_<base::samples::frame::frame_mode_t>(m_base, "FrameMode")
+        .def(py::init<>())
+    ;
+    py::class_<base::samples::frame::frame_status_t>(m_base, "FrameStatus")
+        .def(py::init<>())
     ;
     py::class_<base::Quaterniond>(m_base, "Quaterniond")
         .def(py::init<>())
