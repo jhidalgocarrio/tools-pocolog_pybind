@@ -189,9 +189,13 @@ py::object cast_typelib_value(const Typelib::Value &s, bool recursive = false){
                     obj = py::cast(*(static_cast<std::vector<::base::samples::Event>*>(ptr_data)));
                 } else if (numeric_type == "base/samples/RigidBodyState_m") {
                     obj = py::cast(*(static_cast<std::vector<::base::samples::RigidBodyState>*>(ptr_data)));
+                } else if (numeric_type == "wrappers/Matrix</double,3,1>") {
+                    obj = py::cast(*(static_cast<std::vector<::base::Vector3d>*>(ptr_data)));
+                } else if (numeric_type == "wrappers/Matrix</double,4,1>") {
+                    obj = py::cast(*(static_cast<std::vector<::base::Vector4d>*>(ptr_data)));
                 } else {
-                    std::cout << "Encountered type " << type.getName() << std::endl;
-                    throw std::runtime_error("This type is not implemented");
+                    std::cout << "Encountered type " << type.getName()<<" has numeric type "<<numeric_type<< std::endl;
+                    throw std::runtime_error("This type here is not implemented");
                 }
 
             } else {
