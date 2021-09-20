@@ -333,6 +333,11 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .value("STATUS_VALID", base::samples::frame::frame_status_t::STATUS_VALID)
         .value("STATUS_INVALID", base::samples::frame::frame_status_t::STATUS_INVALID)
     ;
+    py::class_<base::samples::frame::frame_attrib_t>(m_base, "FrameAttrib")
+        .def(py::init<>())
+        .def_readwrite("data", &base::samples::frame::frame_attrib_t::data_)
+        .def_readwrite("name", &base::samples::frame::frame_attrib_t::name_)
+    ;
     py::class_<base::Quaterniond>(m_base, "Quaterniond")
         .def(py::init<>())
         .def("x", (double &(Eigen::Quaternion<double,  Eigen::DontAlign>::*)()) (&Eigen::Quaternion<double,  Eigen::DontAlign>::x))
