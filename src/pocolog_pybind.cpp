@@ -279,6 +279,7 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def_readwrite("y", &base::samples::Event::y)
         .def_readwrite("ts", &base::samples::Event::ts)
         .def_readwrite("p", &base::samples::Event::polarity)
+        .def_readwrite("polarity", &base::samples::Event::polarity)
     ;
     py::class_<base::Time>(m_base, "Time")
         .def(py::init<>())
