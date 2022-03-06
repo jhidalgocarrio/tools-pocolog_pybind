@@ -3,7 +3,6 @@
 #include <base/samples/Event.hpp>
 #include <base/samples/Frame.hpp>
 #include <base/samples/RigidBodyState.hpp>
-#include <orocos/eds/edsTypes.hpp>
 #include <cassert>
 #include <iostream>
 #include <iterator>
@@ -348,13 +347,6 @@ PYBIND11_MODULE(pocolog_pybind, m) {
         .def("__repr__",[](const base::Quaterniond &q) {
             return "["+std::to_string(q.x())+" "+ std::to_string(q.y())+" "+ std::to_string(q.z())+" "+ std::to_string(q.w())+"]";
         })
-    ;
-
-    py::module_ m_eds = m.def_submodule("eds", "EDS types namespace");
-    py::class_<eds::VectorKFs>(m_eds, "VectorKFs")
-        .def(py::init<>())
-        .def_readwrite("time", &eds::VectorKFs::time)
-        .def_readwrite("kfs", &eds::VectorKFs::kfs)
     ;
 
     py::module_ m_typelib = m.def_submodule("typelib", "Typelib namespace");
